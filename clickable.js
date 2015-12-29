@@ -4,6 +4,7 @@
  * Version 1.2 - amended to work with swipe
  * Version 1.3 - added event binding on init if no event object is passed in
  * Version 1.4 - added an off-class and support for reaping elements from other instances of Clickable
+ * Version 1.5 - added support for multiple classes
  */
 
 var Clickable = function (el, settings, event, callback) {
@@ -26,6 +27,9 @@ Clickable.prototype = {
         bindtoswipe: false,
         reap: false,
         contain: false,
+        containtotarget: false,
+        containandexit: true,
+        containmaxwidth:0,
         swipeEscape: ".no-swipe",
         swipeOnEvent: 'swipeleft',
         swipeOffEvent: 'swiperight',
@@ -50,9 +54,14 @@ Clickable.prototype = {
 
     clicker: function (event) {
         var self = this;
-        if (this.config.contain && typeof (event) == "object" && $(event.target).is(this.elem)) {
-            event.preventDefault(), event.stopPropagation();
-            return false;
+        
+        if (this.config.contain && typeof (event) == "object" && $(event.target).is(this.elem) == this.config.containtotarget) {
+            if (!this.config.containmaxwidth || ($(window).width() < this.config.containmaxwidth)) {
+                event.preventDefault(), event.stopPropagation();
+                if (this.config.containandexit) {
+                    return false;
+                }
+            }
         }
         typeof (event) == "string" && this[event]() || this.controller();
     },
@@ -62,24 +71,24 @@ Clickable.prototype = {
 
         if (this.elem.hasClass(this.config.classname)) {
             this.turnOff();
-            this.callback && this.callback(this);
         }
         else {
             this.turnOn();
-            this.callback && this.callback(this);
         }
+        this.callback && this.callback(this);
         $('.' + this.config.reapingClass).removeClass(this.config.reapingClass);
     },
 
     turnOn: function () {
-        this.elem.addClass(this.config.classname);
-        this.config.target && $(this.config.target).addClass(this.config.classname);
         if (typeof this.config.offclassname == "string") {
             this.elem.removeClass(this.config.offclassname);
             this.config.target && $(this.config.target).removeClass(this.config.offclassname);
         }
+        this.config.target && $(this.config.target).addClass(this.config.classname);
+        this.elem.addClass(this.config.classname);
         this.status = true;
         this.elem.trigger('clickabled');
+        return true;
     },
     turnOff: function () {
         this.elem.removeClass(this.config.classname);
@@ -90,23 +99,27 @@ Clickable.prototype = {
         }
         this.status = false;
         this.elem.trigger('unclickabled');
+        return true;
     },
 
     reaper: function () {
         var self = this;
         var reapees = false;
         var reap = this.config.reap.split(':');
+        var classes = this.config.classname.split(" ");
+        classes = classes.join(".");
+        console.log(classes)
         switch (reap[0]) {
             case "siblings":
-                reapees = this.elem.siblings('.' + self.config.classname);
-                reapees = reapees.add(reapees.children('.' + self.config.classname));
+                reapees = this.elem.siblings('.' + classes);
+                reapees = reapees.add(reapees.children('.' + classes));
                 break;
             case "parents":
-                reapees = this.elem.parent().siblings('.' + self.config.classname);
-                reapees = reapees.add(reapees.children('.' + self.config.classname));
+                reapees = this.elem.parent().siblings('.' + classes);
+                reapees = reapees.add(reapees.children('.' + classes));
                 break;
             case "all":
-                reapees = $('.' + self.config.classname);
+                reapees = $('.' + classes);
                 break;
             case "others":
                 $(reap[1]).each(function () {
@@ -115,9 +128,10 @@ Clickable.prototype = {
                 });
                 break;
             default:
-                reapees = $(this.config.reap).filter('.' + self.config.classname);
+                reapees = $(this.config.reap).filter('.' + classes);
         }
         if (reapees) {
+            console.log(reapees)
             reapees.first().parent().addClass(self.config.reapingClass);
             reapees.removeClass(self.config.classname);
         }
