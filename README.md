@@ -1,7 +1,7 @@
 # ablejs
 A succinct jQuery plugin library for creating CSS animations off the back of jQuery events.
 
-Full documentation: http://www.adamanthony.co.uk/resources/scrollablejs/
+Full documentation: http://www.adamanthony.co.uk/resources/
 
 Dependencies:
 - jQuery 1.8+
