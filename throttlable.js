@@ -2,6 +2,7 @@
  * Licensed under The MIT License (MIT) - http://opensource.org/licenses/MIT
  * THROTTLABLE - Plugin to make reduce the imapct of scroll event binding by providing a new throttled event
  * Version 2.0 - Added a timer to ensure a scroll event always fires after scrolling, even if the throttle point has not been reached
+ * Version 2.1 - added destroy implementation
  */
 
 (function ($) {
@@ -25,7 +26,7 @@
         var control = {
             init: function () {
                 //init the scroll event
-                $(t).on('scroll', control.throttle);
+                $(t).on('scroll.throttlable', control.throttle);
             },
             throttle: function () {
                 var scrollTop = $(window).scrollTop();
@@ -65,6 +66,10 @@
                 config.scroll = false;
                 //fire custom event
                 $(document).trigger(config.chokeevent);
+            },
+            destroy: function () {
+                control.timer(true);
+                $(t).unbind('scroll.throttlable');
             }
         };
 
