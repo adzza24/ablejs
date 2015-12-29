@@ -1,43 +1,70 @@
 /* Copyright (c) 2015 Adam Anthony
  * Licensed under The MIT License (MIT) - http://opensource.org/licenses/MIT
- * THROTTLEABLE - Reduces impact of scroll binding by exposing a new event to bind to - "scrollable"
- * Version 1.1 - first release
+ * THROTTLABLE - Plugin to make reduce the imapct of scroll event binding by providing a new throttled event
+ * Version 2.0 - Added a timer to ensure a scroll event always fires after scrolling, even if the throttle point has not been reached
  */
+
 (function ($) {
     $.extend({ remoteCount: 0 });
 
-    $.CreateThrottle = function (t, settings, callback) {
+    $.Throttlable = function (t, settings, callback) {
+
+        //"t" is the window
+
         var config = {
             throttle: 5,
             scrollTop: 0,
-            scroll: false
+            scroll: false,
+            throttleevent: "scroll_throttle",
+            chokeevent: "scroll_choke",
+            timer: null,
+            delay: 200
         };
         $.extend(config, settings);
 
         var control = {
-            init: function (evt, settings) {
-
+            init: function () {
                 //init the scroll event
-                $(t).on('scroll', control.Throttle);
+                $(t).on('scroll', control.throttle);
             },
-
-            Throttle: function (evt, settings) {
-                var scrollTop = $(window).scrollTop(),
-					offset = $('body').children().first().offset().top;
-
+            throttle: function () {
+                var scrollTop = $(window).scrollTop();
                 if (scrollTop > (config.scrollTop + config.throttle) || scrollTop < (config.scrollTop - config.throttle) || scrollTop == 0) {
-                    //update config values
-                    config.scrollTop = scrollTop;
-                    config.scroll = true;
-
-                    //fire custom event
-                    $(document).trigger('scrollable');
+                    //console.log("scroll throttle");
+                    control.release(scrollTop);
+                    return;
                 }
                 else if (config.scroll) {
-                    config.scroll = false;
-                    //fire custom event
-                    $(document).trigger('unscrollable');
+                    //console.log("scroll choke");
+                    control.choke();
+                    return;
                 }
+                control.timer();
+            },
+            timer: function (clear) {
+                clearTimeout(config.timer);
+                if (clear) {
+                    return;
+                }
+                config.timer = setTimeout(function () {
+                    //console.log("scroll timer");
+                    control.release();
+                }, config.delay);
+            },
+            release: function (scrollTop) {
+                //destory timeout
+                control.timer(true);
+                //update config values
+                config.scrollTop = scrollTop || $(window).scrollTop();
+                config.scroll = true;
+
+                //fire custom event
+                $(document).trigger(config.throttleevent);
+            },
+            choke: function () {
+                config.scroll = false;
+                //fire custom event
+                $(document).trigger(config.chokeevent);
             }
         };
 
@@ -52,7 +79,7 @@
     $.fn.Throttle = function (p, callback) {
         return this.each(function () {
 
-            $.CreateThrottle(this, p, callback)
+            $.Throttlable(this, p, callback)
 
         });
     };
@@ -65,7 +92,4 @@
         });
 
     };
-
-    $(window).Throttle();
-
 }(jQuery));
