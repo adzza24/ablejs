@@ -3,98 +3,94 @@
  * THROTTLABLE - Plugin to make reduce the imapct of scroll event binding by providing a new throttled event
  * Version 2.0 - Added a timer to ensure a scroll event always fires after scrolling, even if the throttle point has not been reached
  * Version 2.1 - added destroy implementation
+ * Version 2.2 - converted to a protoype model like other functions in able.js
  */
 
 (function ($) {
-    $.extend({ remoteCount: 0 });
-
-    $.Throttlable = function (t, settings, callback) {
-
+    var Throttlable = function (t, settings, callback) {
         //"t" is the window
-
-        var config = {
+        this.config = $.extend({}, this.defaults, settings);
+        this.elem = $(t);
+        this.init();
+    };
+    Throttlable.prototype= {
+        defaults: {
             throttle: 5,
             scrollTop: 0,
             scroll: false,
             throttleevent: "scroll_throttle",
             chokeevent: "scroll_choke",
             timer: null,
-            delay: 200
-        };
-        $.extend(config, settings);
-
-        var control = {
-            init: function () {
-                //init the scroll event
-                $(t).on('scroll.throttlable', control.throttle);
-            },
-            throttle: function () {
-                var scrollTop = $(window).scrollTop();
-                if (scrollTop > (config.scrollTop + config.throttle) || scrollTop < (config.scrollTop - config.throttle) || scrollTop == 0) {
-                    //console.log("scroll throttle");
-                    control.release(scrollTop);
-                    return;
-                }
-                else if (config.scroll) {
-                    //console.log("scroll choke");
-                    control.choke();
-                    return;
-                }
-                control.timer();
-            },
-            timer: function (clear) {
-                clearTimeout(config.timer);
-                if (clear) {
-                    return;
-                }
-                config.timer = setTimeout(function () {
-                    //console.log("scroll timer");
-                    control.release();
-                }, config.delay);
-            },
-            release: function (scrollTop) {
-                //destory timeout
-                control.timer(true);
-                //update config values
-                config.scrollTop = scrollTop || $(window).scrollTop();
-                config.scroll = true;
-
-                //fire custom event
-                $(document).trigger(config.throttleevent);
-            },
-            choke: function () {
-                config.scroll = false;
-                //fire custom event
-                $(document).trigger(config.chokeevent);
-            },
-            destroy: function () {
-                control.timer(true);
-                $(t).unbind('scroll.throttlable');
+            failsafe: 200
+        },
+        init: function () {
+            //init the scroll event
+            var self = this;
+            this.elem.on('scroll.throttlable', function () {
+                self.throttle();
+            });
+        },
+        throttle: function () {
+            var scrollTop = $(window).scrollTop();
+            if (scrollTop > (this.config.scrollTop + this.config.throttle) || scrollTop < (this.config.scrollTop - this.config.throttle) || scrollTop == 0) {
+                //console.log("scroll throttle");
+                this.release(scrollTop);
+                return;
             }
-        };
+            else if (this.config.scroll) {
+                //console.log("scroll choke");
+                this.choke();
+                return;
+            }
+            //add a timeout as a fail safe
+            this.timer();
+        },
+        timer: function (clear) {
+            clearTimeout(this.config.timer);
+            if (clear) {
+                return;
+            }
+            this.config.timer = setTimeout(function () {
+                this.release();
+            }, this.config.failsafe);
+        },
+        release: function (scrollTop) {
+            //destory timeout
+            this.timer(true);
+            //update config values
+            this.config.scrollTop = scrollTop || $(window).scrollTop();
+            this.config.scroll = true;
 
-        control.init();
-
-        t.control = control;
-        t.config = config;
-
-        return t;
+            //fire custom event
+            $(document).trigger(this.config.throttleevent);
+        },
+        choke: function () {
+            this.config.scroll = false;
+            //fire custom event
+            $(document).trigger(this.config.chokeevent);
+        },
+        destroy: function () {
+            this.timer(true);
+            this.elem.unbind('scroll.throttlable');
+        }
     };
 
-    $.fn.Throttle = function (p, callback) {
+    $.fn.throttle = function (p, callback) {
         return this.each(function () {
-
-            $.Throttlable(this, p, callback)
-
+            var elem = $(this),
+                data = elem.data(),
+                t = data.throttlable;
+            t || elem.data('throttlable', t = new Throttlable(this, $.extend({}, typeof p == "object" ? p : {}, data), callback));
         });
     };
-    $.fn.Destroy = function () {
-
+    $.fn.destroyThrottle = function () {
         return this.each(function () {
-            if (this.control) {
-                this.control.destroy();
+            var elem = $(this),
+                data = elem.data(),
+                t = data.throttlable;
+            if (t) {
+                t.destroy();
             }
         });
-
     };
 }(jQuery));
