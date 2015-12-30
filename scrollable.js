@@ -3,7 +3,7 @@
  * SCROLLABLE - Plugin to make elements on a page respond to scroll events dependent on their position
  * Version 1.1
  * Version 1.2 - Added handling for directional indication classes
- * Version 1.3 - Added an unscrolled option, and created an opposing instance of Scrollable to control the adding/removing of this class
+ * Version 2.0 - Added an unscrolled option, and created an opposing instance of Scrollable to control the adding/removing of this class
  */
 (function ($) {
 
