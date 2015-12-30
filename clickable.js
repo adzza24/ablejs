@@ -4,7 +4,7 @@
  * Version 1.2 - amended to work with swipe
  * Version 1.3 - added event binding on init if no event object is passed in
  * Version 1.4 - added an off-class and support for reaping elements from other instances of Clickable
- * Version 1.5 - added support for multiple classes
+ * Version 2.0 - added support for multiple classes
  */
 
 var Clickable = function (el, settings, event, callback) {
