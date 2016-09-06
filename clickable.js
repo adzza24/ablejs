@@ -1,5 +1,4 @@
-/* Copyright (c) 2016 ITG Creator
- * CLICKABLE - Plugin to make elements on a page respond to click events, including targeting other elements and running a callback
+/* CLICKABLE - Plugin to make elements on a page respond to click events, including targeting other elements and running a callback
  * Docs - http://www.adamanthony.co.uk/resources/clickablejs/
  * Version 1.2 - amended to work with swipe
  * Version 1.3 - added event binding on init if no event object is passed in
