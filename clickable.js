@@ -1,4 +1,6 @@
-/* CLICKABLE - Plugin to make elements on a page respond to click events, including targeting other elements and running a callback
+/* Copyright (c) 2015 Adam Anthony
+ * Licensed under The MIT License (MIT) - http://opensource.org/licenses/MIT
+ * CLICKABLE - Plugin to make elements on a page respond to click events, including targeting other elements and running a callback
  * Docs - http://www.adamanthony.co.uk/resources/clickablejs/
  * Version 1.2 - amended to work with swipe
  * Version 1.3 - added event binding on init if no event object is passed in
