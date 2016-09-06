@@ -1,5 +1,5 @@
-/* Copyright (c) 2016 Adam Anthony
- * 
+/* Copyright (c) 2015 Adam Anthony
+ * Licensed under The MIT License (MIT) - http://opensource.org/licenses/MIT
  * DROPPABLE - Plugin to make custom select lists
  * Version 4.2 - fixed keyboard handling, getting the value of the option as well as the inner html
  * Version 4.2.1 - 8/10/2015: fixed blur timer cancellation on mousedown,
