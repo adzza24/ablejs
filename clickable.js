@@ -1,6 +1,4 @@
-/* Copyright (c) 2015 Adam Anthony
- * Licensed under The MIT License (MIT) - http://opensource.org/licenses/MIT
- * CLICKABLE - Plugin to make elements on a page respond to click events, including targeting other elements and running a callback
+/* CLICKABLE - Plugin to make elements on a page respond to click events, including targeting other elements and running a callback
  * Docs - http://www.adamanthony.co.uk/resources/clickablejs/
  * Version 1.2 - amended to work with swipe
  * Version 1.3 - added event binding on init if no event object is passed in
@@ -8,7 +6,7 @@
  * Version 1.5 - added support for multiple classes
  * Version 1.6.0 - made .clickable() look at element data for settings
  * Version 1.6.1 - added a "select" case for reaping, whereby an jQuery selector can be passed in
- * Version 1.6.2 - Made reap:others function without reaping itself
+ * Version 1.6.2 - Made reap function without reaping itself
  */
 
 var Clickable = function (el, settings, event, callback) {
@@ -150,7 +148,11 @@ Clickable.prototype = {
         if (reapees) {
             console.log(reapees)
             reapees.first().parent().addClass(self.config.reapingClass);
-            reapees.removeClass(self.config.classname);
+            reapees.each(function () {
+                if (this !== self.elem[0]) {
+                    $(this).removeClass(self.config.classname);
+                }
+            });
         }
     },
 
